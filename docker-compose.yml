@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agentics-postgres
+    environment:
+      POSTGRES_DB: agentics_db
+      POSTGRES_USER: agentics_user
+      POSTGRES_PASSWORD: agentics_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentics_user -d agentics_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  leaf-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.leaf-api
+    container_name: agentics-leaf-api
+    environment:
+      FLASK_APP: leaf_api.app:create_app
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://agentics_user:agentics_password@postgres:5432/agentics_db
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-demo-secret-key}
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./leaf_api:/app/leaf_api
+    command: flask run --host=0.0.0.0
+
+  root-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.root-app
+    container_name: agentics-root-app
+    environment:
+      FLASK_APP: root_app.app:create_app
+      FLASK_ENV: development
+      CHILD_API_URLS: http://leaf-api:5000
+      CACHE_DIR: /app/cache
+    ports:
+      - "5001:5001"
+    depends_on:
+      - leaf-api
+    volumes:
+      - ./root_app:/app/root_app
+      - ./cache:/app/cache
+    command: flask run --host=0.0.0.0 --port=5001
+
+volumes:
+  postgres_data:
