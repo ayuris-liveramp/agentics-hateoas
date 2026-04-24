@@ -24,11 +24,12 @@ def create_app(config_name: str = None) -> Flask:
     def internal_error(error):
         return jsonify({"error": "Internal server error"}), 500
 
-    # Register blueprints (will be implemented in Phase 3 & 4)
+    # Register blueprints
     with app.app_context():
-        from root_app.routes import health
+        from root_app.routes import health, discovery
 
         app.register_blueprint(health.bp)
+        app.register_blueprint(discovery.bp)
 
     return app
 
