@@ -35,7 +35,7 @@ This repository contains a two-part architecture:
 
 ```bash
 # Start all services
-docker-compose up
+make
 
 # In another terminal, test the leaf API
 curl http://localhost:5000/

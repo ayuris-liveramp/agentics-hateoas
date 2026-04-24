@@ -1,6 +1,29 @@
-OPENSSL_IMAGE:=docker.io/library/python:3.11-slim
+SHELL=zsh
+venv=source .venv/bin/activate &&
 
-default: leaf_api/auth/keypair.pem
+OPENSSL_IMAGE:=python:3.11-slim
+
+default: .venv requirements-frozen.txt leaf_api/auth/keypair.pem docker-compose.yaml.build docker-compose.yaml.up
+
+.venv:
+	uv venv $@
+	$(MAKE) .venv/lib/python/site-packages
+
+.venv/lib/python/site-packages: requirements.txt
+	$(venv) uv pip install -r requirements.txt --native-tls
+
+requirements-frozen.txt: requirements.txt
+	$(venv) uv pip freeze > $@
+
+docker-compose.yaml.build:
+	docker compose build
+
+docker-compose.yaml.up:
+	docker compose up -d
+	docker compose logs -f
+
+docker-compose.yaml.down:
+	docker compose down
 
 leaf_api/auth/keypair.pem:
 	docker run --rm -it --entrypoint openssl \
