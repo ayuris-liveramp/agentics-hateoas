@@ -1,3 +1,9 @@
+# NOTICE
+
+Until this header is removed, no human has verified the contents of this repository. I generated it using Haiku on low effort while waiting at the airport, and haven't reveiwed it yet.
+
+---
+
 # Agentics-HATEOAS
 
 A standard for crafting LLM-discoverable APIs by leveraging content negotiation and HEAD requests. This project demonstrates how to build APIs that expose their surface through hypermedia (HATEOAS) while supporting LLM agents as first-class clients.
