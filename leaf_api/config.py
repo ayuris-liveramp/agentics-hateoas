@@ -13,7 +13,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "demo-secret-key")
-    JWT_ALGORITHM = "RS256"
+    JWT_ALGORITHM = "EdDSA"
 
     API_TITLE = "Agentics Orders API"
     API_VERSION = "1.0.0"

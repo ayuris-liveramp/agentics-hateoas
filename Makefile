@@ -37,3 +37,7 @@ leaf_api/auth/public_key.pem: leaf_api/auth/keypair.pem
 		$(OPENSSL_IMAGE) \
 		ec -inform PEM -in /tmp/$$(basename $<) -pubout -out /tmp/$(@F)
 
+leaf_api/auth/token.b64: leaf_api/auth/token.admin.b64
+
+leaf_api/auth/token.%.b64: leaf_api/auth/public_key.pem
+	python -m leaf_api.auth.token $* > $@

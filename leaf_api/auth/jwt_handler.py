@@ -40,7 +40,7 @@ class JWTHandler:
 
     def validate_jwt(self, token: str) -> Optional[Dict]:
         """
-        Validates RS256 JWT token and returns claims
+        Validates Ed25519 JWT token and returns claims
         Returns None if invalid
         """
         if not token:
@@ -50,7 +50,7 @@ class JWTHandler:
             claims = jwt.decode(
                 token,
                 self.public_key,
-                algorithms=["RS256"],
+                algorithms=["EdDSA"],
             )
             return claims
         except jwt.ExpiredSignatureError:
@@ -118,7 +118,7 @@ class JWTHandler:
         return jwt.encode(
             payload,
             self.private_key,
-            algorithm="RS256",
+            algorithm="EdDSA",
         )
 
 

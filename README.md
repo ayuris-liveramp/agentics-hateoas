@@ -88,19 +88,20 @@ FLASK_APP=root_app.app:create_app flask run --port 5001
 - Role-based field visibility for schemas
 
 **Example JWT Token:**
-```python
-from leaf_api.auth.jwt_handler import JWTHandler
+```sh
+make leaf_api/auth/token.b64
 
-handler = JWTHandler(
-    public_key_path="leaf_api/auth/public_key.pem",
-    private_key_path="leaf_api/auth/keypair.pem"
-)
+# this is equivalent to the above command
+make leaf_api/auth/token.admin.b64
 
-# Create a token
-token = handler.create_token(user_id="user123", role="admin", exp=3600)
+# you can make other roles too
+make leaf_api/auth/token.user.b64
+make leaf_api/auth/token.public.b64
+```
 
-# Use in request
-curl -H "Authorization: Bearer $token" http://localhost:5000/orders
+**Use in request**
+```sh
+curl -H "Authorization: Bearer <(leaf_api/auth/token.b64)" http://localhost:5000/orders
 ```
 
 ### Root Application
