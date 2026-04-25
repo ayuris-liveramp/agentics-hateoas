@@ -2,8 +2,18 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install build dependencies needed for psycopg2 compilation
+RUN apt-get update && apt-get install -y \
+    gcc \
+    build-essential \
+    libpq-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-frozen.txt .
+# Set LDFLAGS and CFLAGS so psycopg2 can find SSL libraries during compilation
+RUN LDFLAGS="-L/usr/lib/x86_64-linux-gnu" CFLAGS="-I/usr/include" \
+    pip install --no-cache-dir -r requirements-frozen.txt
 
 COPY . .
 

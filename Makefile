@@ -15,12 +15,11 @@ default: .venv requirements-frozen.txt leaf_api/auth/keypair.pem docker-compose.
 requirements-frozen.txt: requirements.txt
 	$(venv) uv pip freeze > $@
 
-docker-compose.yaml.build:
+docker-compose.yaml.build: requirements-frozen.txt
 	docker compose build
 
 docker-compose.yaml.up:
-	docker compose up -d
-	docker compose logs -f
+	docker compose up
 
 docker-compose.yaml.down:
 	docker compose down
