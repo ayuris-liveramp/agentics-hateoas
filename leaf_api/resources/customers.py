@@ -23,7 +23,7 @@ def list_customers():
 
     customers = Customer.query.all()
     data = {
-        "items": [c.to_dict() for c in customers],
+        "items": [c.model_dump() for c in customers],
         "_meta": {"role": user_context["role"]},
     }
     return jsonify(data)
@@ -86,7 +86,7 @@ def get_customer(customer_id: int):
 
     customer = Customer.query.get_or_404(customer_id)
     data = {
-        **customer.to_dict(),
+        **customer.model_dump(),
         "_meta": {"role": user_context["role"]},
     }
     return jsonify(data)

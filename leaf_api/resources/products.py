@@ -23,7 +23,7 @@ def list_products():
 
     products = Product.query.all()
     data = {
-        "items": [p.to_dict() for p in products],
+        "items": [p.model_dump() for p in products],
         "_meta": {"role": user_context["role"]},
     }
     return jsonify(data)
@@ -86,7 +86,7 @@ def get_product(product_id: int):
 
     product = Product.query.get_or_404(product_id)
     data = {
-        **product.to_dict(),
+        **product.model_dump(),
         "_meta": {"role": user_context["role"]},
     }
     return jsonify(data)

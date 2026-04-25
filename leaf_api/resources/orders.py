@@ -22,7 +22,7 @@ def list_orders():
 
     orders = Order.query.all()
     data = {
-        "items": [o.to_dict() for o in orders],
+        "items": [o.model_dump() for o in orders],
         "_meta": {"role": user_context["role"]},
     }
     return jsonify(data)
@@ -86,7 +86,7 @@ def get_order(order_id: int):
 
     order = Order.query.get_or_404(order_id)
     data = {
-        **order.to_dict(),
+        **order.model_dump(),
         "_meta": {"role": user_context["role"]},
     }
     return jsonify(data)
