@@ -17,6 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - agentics-network
 
   leaf-api:
     build:
@@ -36,6 +38,8 @@ services:
     volumes:
       - ./leaf_api:/app/leaf_api
     command: flask run --host=0.0.0.0
+    networks:
+      - agentics-network
 
   root-app:
     build:
@@ -55,6 +59,12 @@ services:
       - ./root_app:/app/root_app
       - ./cache:/app/cache
     command: flask run --host=0.0.0.0 --port=5001
+    networks:
+      - agentics-network
 
 volumes:
   postgres_data:
+
+networks:
+  agentics-network:
+    driver: bridge
