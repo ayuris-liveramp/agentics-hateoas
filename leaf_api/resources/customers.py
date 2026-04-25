@@ -21,7 +21,7 @@ def list_customers():
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    customers = Customer.query.all()
+    customers = db.session.query(Customer).all()
     data = {
         "items": [c.model_dump() for c in customers],
         "_meta": {"role": user_context["role"]},
@@ -45,7 +45,7 @@ def head_customers():
     )
 
     # Get child customer IDs
-    customers = Customer.query.all()
+    customers = db.session.query(Customer).all()
     children = [f"/customers/{c.id}" for c in customers]
 
     # Build discovery response
@@ -84,7 +84,7 @@ def get_customer(customer_id: int):
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    customer = Customer.query.get_or_404(customer_id)
+    customer = db.session.query(Customer).filter(Customer.id == customer_id).first_or_404()
     data = {
         **customer.model_dump(),
         "_meta": {"role": user_context["role"]},
@@ -101,7 +101,7 @@ def head_customer(customer_id: int):
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    customer = Customer.query.get_or_404(customer_id)
+    customer = db.session.query(Customer).filter(Customer.id == customer_id).first_or_404()
 
     # Generate schema
     schema = CustomerSchemaGenerator.get_detail_schema(

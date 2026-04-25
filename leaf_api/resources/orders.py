@@ -20,7 +20,7 @@ def list_orders():
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    orders = Order.query.all()
+    orders = db.session.query(Order).all()
     data = {
         "items": [o.model_dump() for o in orders],
         "_meta": {"role": user_context["role"]},
@@ -44,7 +44,7 @@ def head_orders():
     )
 
     # Get child order IDs
-    orders = Order.query.all()
+    orders = db.session.query(Order).all()
     children = [f"/orders/{o.id}" for o in orders]
 
     # Build discovery response
@@ -84,7 +84,7 @@ def get_order(order_id: int):
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    order = Order.query.get_or_404(order_id)
+    order = db.session.query(Order).filter(Order.id == order_id).first_or_404()
     data = {
         **order.model_dump(),
         "_meta": {"role": user_context["role"]},
@@ -102,7 +102,7 @@ def head_order(order_id: int):
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    order = Order.query.get_or_404(order_id)
+    order = db.session.query(Order).filter(Order.id == order_id).first_or_404()
 
     # Generate schema
     schema = OrderSchemaGenerator.get_detail_schema(

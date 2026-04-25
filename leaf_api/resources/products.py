@@ -21,7 +21,7 @@ def list_products():
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    products = Product.query.all()
+    products = db.session.query(Product).all()
     data = {
         "items": [p.model_dump() for p in products],
         "_meta": {"role": user_context["role"]},
@@ -45,7 +45,7 @@ def head_products():
     )
 
     # Get child product IDs
-    products = Product.query.all()
+    products = db.session.query(Product).all()
     children = [f"/products/{p.id}" for p in products]
 
     # Build discovery response
@@ -84,7 +84,7 @@ def get_product(product_id: int):
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    product = Product.query.get_or_404(product_id)
+    product = db.session.query(Product).filter(Product.id == product_id).first_or_404()
     data = {
         **product.model_dump(),
         "_meta": {"role": user_context["role"]},
@@ -101,7 +101,7 @@ def head_product(product_id: int):
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    product = Product.query.get_or_404(product_id)
+    product = db.session.query(Product).filter(Product.id == product_id).first_or_404()
 
     # Generate schema
     schema = ProductSchemaGenerator.get_detail_schema(
