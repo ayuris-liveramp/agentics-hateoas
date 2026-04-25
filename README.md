@@ -51,17 +51,8 @@ curl http://localhost:5001/health
 
 ```bash
 # Create virtual environment
-python3 -m venv venv
+make .venv
 source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up environment variables
-cp .env.example .env
-
-# Run migrations (if using Alembic)
-# flask db upgrade
 
 # Start leaf API
 FLASK_APP=leaf_api.app:create_app flask run
@@ -147,40 +138,6 @@ Root App caches + extracts skill markdown
 Agent receives skill description in HEAD response body
 ```
 
-## Implementation Phases
-
-### Phase 1: ✅ Leaf API Foundation
-- Flask app structure with config management
-- SQLAlchemy models (Order, Customer, Product)
-- JWT validation middleware with RS256
-- Docker Compose setup with PostgreSQL
-
-### Phase 2: Discovery Protocol (Leaf API)
-- JSONSchemaBuilder for schema generation
-- Role-based schema filtering
-- Query parameter processing (e.g., `?positive_only=true`)
-- HEAD request handlers with ETag generation
-- Cache headers middleware
-- `.well-known/agentics-robots.txt` endpoint
-
-### Phase 3: Root Application Crawler
-- HTTP client for HEAD requests
-- Recursive API crawler with cycle detection
-- Cache manager with ETag storage
-- API graph builder and storage
-
-### Phase 4: Agent Interface (Root App)
-- Skill markdown builder
-- Accept-Intention header parser
-- HEAD request handler in root app
-- Crawler integration with agent routes
-
-### Phase 5: Testing & Documentation
-- Unit tests for JWT, schema generation
-- Integration tests for HEAD request flows
-- API protocol documentation
-- Architecture documentation
-
 ## Testing
 
 ### Functional Tests (v0.0.0 - v0.x.x)
@@ -208,31 +165,6 @@ pytest --cov=leaf_api --cov=root_app
 ```
 
 **Note:** Until v1.0.0, unit tests are limited to simple objects and transformations. Pass-through logic is excluded. At v1.0.0, the API will be locked and exhaustive unit testing will begin for backwards-compatibility assurance.
-
-## Project Structure
-
-```
-agentics-hateoas/
-├── leaf_api/                  # Example Orders API
-│   ├── app.py                 # Flask application factory
-│   ├── config.py              # Configuration
-│   ├── models/                # SQLAlchemy models
-│   ├── auth/                  # JWT handling
-│   ├── schemas/               # JSON schema generation
-│   ├── resources/             # API endpoints
-│   ├── middleware/            # Discovery & caching
-│   └── tests/                 # Test suite
-├── root_app/                  # Root Application
-│   ├── app.py                 # Flask application factory
-│   ├── config.py              # Configuration
-│   ├── crawler/               # API discovery
-│   ├── agent/                 # Agent interface
-│   ├── routes/                # API endpoints
-│   └── tests/                 # Test suite
-├── shared/                    # Shared utilities
-├── docker-compose.yml         # Service orchestration
-└── requirements.txt           # Python dependencies
-```
 
 ## Documentation
 
