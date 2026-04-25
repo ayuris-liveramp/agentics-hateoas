@@ -1,16 +1,11 @@
 from datetime import datetime
-from leaf_api.models import db
+from typing import Optional
+from sqlmodel import SQLModel, Field
 
 
-class BaseModel(db.Model):
-    """Base model with common fields"""
-    __abstract__ = True
+class BaseModel(SQLModel):
+    """Base model with common fields - abstract base for all models"""
 
-    id = db.Column(db.Integer, primary_key=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
-        nullable=False,
-    )
+    id: Optional[int] = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
