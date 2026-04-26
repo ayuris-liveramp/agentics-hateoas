@@ -18,11 +18,20 @@ requirements-frozen.txt: requirements.txt
 docker-compose.yaml.build: requirements-frozen.txt
 	docker compose build
 
-docker-compose.yaml.up:
+docker-compose.yaml.up: docker-compose.yaml.down
 	docker compose up
 
 docker-compose.yaml.down:
-	docker compose down
+	-docker compose down
+
+docker-compose.yaml.check:
+	@echo "Checking docker compose services..."
+	@docker compose ps --format '{{index .Labels "com.docker.compose.service"}}' | \
+		wc -l | xargs -I{} test {} -eq 3 || \
+		(echo "Error: docker compose services not running. Run 'make' first."; exit 1)
+
+psql: docker-compose.yaml.check
+	docker compose exec postgres psql -U agentics_user -p 5432 agentics_db
 
 leaf_api/auth/keypair.pem:
 	docker run --rm -it --entrypoint openssl \
@@ -42,10 +51,7 @@ leaf_api/auth/token.%.b64: leaf_api/auth/public_key.pem
 	python -m leaf_api.auth.token $* > $@
 
 .PHONY: test
-test:
-	@echo "Checking docker compose services..."
-	@docker compose ps --services | grep -q leaf-api && docker compose ps --services | grep -q root-app || \
-		(echo "Error: docker compose services not running. Run 'make' first."; exit 1)
+test: docker-compose.yaml.check
 	@echo "Building test image..."
 	@docker build -f tests/Dockerfile -t agentics-test .
 	@echo "Running functional tests..."
