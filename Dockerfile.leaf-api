@@ -2,12 +2,13 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install build dependencies needed for psycopg2 compilation
+# Install build dependencies needed for psycopg2 compilation and health checks
 RUN apt-get update && apt-get install -y \
     gcc \
     build-essential \
     libpq-dev \
     libssl-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements-frozen.txt .

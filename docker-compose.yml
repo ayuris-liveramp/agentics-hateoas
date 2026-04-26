@@ -35,6 +35,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
     volumes:
       - ./leaf_api:/app/leaf_api
       - ./db_init:/app/db_init
@@ -56,7 +62,8 @@ services:
     ports:
       - "5001:5001"
     depends_on:
-      - leaf-api
+      leaf-api:
+        condition: service_healthy
     volumes:
       - ./root_app:/app/root_app
       - ./cache:/app/cache
