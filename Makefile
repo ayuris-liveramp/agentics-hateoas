@@ -3,7 +3,7 @@ venv=source .venv/bin/activate &&
 
 OPENSSL_IMAGE:=python:3.11-slim
 
-default: .venv requirements-frozen.txt leaf_api/auth/keypair.pem docker-compose.yaml.build docker-compose.yaml.up
+default: .venv requirements-frozen.txt leaf_api/auth/keypair.pem docker-compose.yaml.build db_init/00_create_database.sql docker-compose.yaml.up
 
 .venv:
 	uv venv $@
@@ -33,7 +33,7 @@ docker-compose.yaml.check:
 psql: docker-compose.yaml.check
 	docker compose exec postgres psql -U agentics_user -p 5432 agentics_db
 
-db_init/00_create_database.sql: docker-compose.yaml.check leaf_api/models/*.py
+db_init/00_create_database.sql: leaf_api/models/*.py
 	docker run --rm -it --entrypoint python \
 		-v "$(PWD)/scripts/:/app/scripts/" \
 		localhost/agentics-hateoas_leaf-api \
