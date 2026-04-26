@@ -62,8 +62,8 @@ test: docker-compose.yaml.check
 	@docker build -f tests/Dockerfile -t agentics-test .
 	@echo "Running functional tests..."
 	@docker run --rm \
-		--network agentics-network \
+		--network agentics-hateoas_agentics-network \
 		-v "$(PWD)/tests:/app/tests" \
 		-e LEAF_API_URL=http://leaf-api:5000 \
 		-e ROOT_APP_URL=http://root-app:5001 \
-		agentics-test pytest -v /app/tests
+		agentics-test -v /app/tests
