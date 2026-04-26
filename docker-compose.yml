@@ -38,6 +38,8 @@ services:
         condition: service_healthy
     volumes:
       - ./leaf_api:/app/leaf_api
+      - ./db_init:/app/db_init
+      - ./scripts:/app/scripts
     command: flask run --host=0.0.0.0
     networks:
       - agentics-network
