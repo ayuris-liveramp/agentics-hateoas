@@ -35,6 +35,34 @@ def get_crawler_and_graph(app_config):
     return graph, graph_store, cache_manager
 
 
+@bp.route("/discover", methods=["GET"])
+def discover():
+    """Get API graph discovery data as JSON"""
+    from flask import current_app
+
+    # Get or initialize crawler and graph
+    graph, graph_store, cache_manager = get_crawler_and_graph(current_app.config)
+
+    # Return graph summary as JSON
+    graph_summary = graph.get_graph_summary()
+    return jsonify(graph_summary)
+
+
+@bp.route("/skills", methods=["GET"])
+def get_skills():
+    """Get agent skills as JSON list"""
+    from flask import current_app
+
+    # Get or initialize crawler and graph
+    graph, graph_store, cache_manager = get_crawler_and_graph(current_app.config)
+
+    # Build skill markdown
+    skill_markdown = SkillBuilder.build_skill_markdown(graph)
+
+    # Return skills as JSON list containing the markdown string
+    return jsonify([skill_markdown])
+
+
 @bp.route("/<path:path>", methods=["HEAD"])
 def discover_path(path):
     """
