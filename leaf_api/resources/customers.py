@@ -12,15 +12,27 @@ from leaf_api.middleware.cache import CacheManager
 bp = Blueprint("customers", __name__, url_prefix="/customers")
 
 
-@bp.route("", methods=["GET"])
+@bp.route("", methods=["GET", "POST"])
 def list_customers():
-    """List all customers (GET)"""
+    """List all customers (GET) or create a new customer (POST)"""
     from flask import current_app
 
     handler = current_app.jwt_handler
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
+    if request.method == "POST":
+        # Create a new customer
+        data = request.get_json()
+        customer = Customer(
+            name=data.get("name"),
+            email=data.get("email"),
+        )
+        db.session.add(customer)
+        db.session.commit()
+        return jsonify(customer.model_dump()), 201
+
+    # GET request - list all customers
     customers = db.session.query(Customer).all()
     data = {
         "items": [c.model_dump() for c in customers],

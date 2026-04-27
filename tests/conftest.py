@@ -40,6 +40,18 @@ def wait_for_services(root_app_url: str, leaf_api_url: str) -> None:
                 else:
                     raise RuntimeError(f"{name} ({url}) failed to start")
 
+    # Debug: check registered routes in root app
+    try:
+        routes_resp = requests.get(f"{root_app_url}/_routes", timeout=2)
+        if routes_resp.status_code == 200:
+            routes = routes_resp.json()
+            print(f"\n=== Root App Routes ===")
+            for route in routes:
+                print(f"  {route['rule']} {route['methods']}")
+            print("=======================\n")
+    except Exception as e:
+        print(f"Warning: Could not fetch route list: {e}")
+
 
 @pytest.fixture(scope="session")
 def root_client(root_app_url: str, wait_for_services: None):
