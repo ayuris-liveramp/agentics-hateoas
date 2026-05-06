@@ -29,7 +29,7 @@ docker-compose.yaml.down:
 
 docker-compose.yaml.check:
 	@echo "Checking docker compose services..."
-	@docker compose ps --format '{{index .Labels "com.docker.compose.service"}}' | \
+	@docker compose ps --format '{{.Service}}' | \
 		wc -l | xargs -I{} test {} -eq 3 || \
 		(echo "Error: docker compose services not running. Run 'make' first."; exit 1)
 
