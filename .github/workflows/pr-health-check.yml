@@ -13,6 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install zsh
+        run: sudo apt-get install -y zsh
+
       - name: Build images
         run: docker compose build
 
