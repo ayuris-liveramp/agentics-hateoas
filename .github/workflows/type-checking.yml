@@ -6,7 +6,7 @@ on:
 
 jobs:
   type-check:
-    name: Pyrefly
+    name: pyrefly
     runs-on: ubuntu-latest
 
     steps:

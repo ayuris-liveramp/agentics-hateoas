@@ -5,8 +5,8 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
-  health-check:
-    name: Docker Compose + Health Tests
+  functional-tests:
+    name: pytest
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
 
@@ -17,17 +17,10 @@ jobs:
         run: sudo apt-get install -y zsh
 
       - name: Build images
-        run: docker compose build
+        run: docker compose build --quiet
 
       - name: Start services and wait for healthy
-        run: docker compose up -d --wait --wait-timeout 120
-
-      - name: Show service state (raw JSON)
-        run: |
-          echo "=== docker compose ps --format json ==="
-          docker compose ps --format json
-          echo "=== docker compose ps (table) ==="
-          docker compose ps
+        run: docker compose up -d --wait --wait-timeout 120 --quiet-pull
 
       - name: Run tests
         run: make test
