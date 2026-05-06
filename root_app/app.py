@@ -1,8 +1,11 @@
 """Root application factory"""
 
+import base64
 import os
 from typing import Optional
-from flask import Flask, jsonify, current_app
+import anthropic
+from anthropic.types import TextBlock
+from flask import Flask, jsonify, request, current_app
 from root_app.config import config
 
 
@@ -45,6 +48,30 @@ def create_app(config_name: Optional[str] = None) -> Flask:
         graph, graph_store, cache_manager = get_crawler_and_graph(current_app.config)
         skill_markdown = SkillBuilder.build_skill_markdown(graph)
         return jsonify([skill_markdown])
+
+    @app.route("/", methods=["HEAD"])
+    def head_root():
+        """Return Anthropic-generated skill payload for Accept-Intention HEAD requests."""
+        intention = request.headers.get("Accept-Intention", "create a new product and order it")
+        client = anthropic.Anthropic(
+            api_key=os.environ.get("ANTHROPIC_API_KEY", "test-key"),
+            base_url=os.environ.get("ANTHROPIC_BASE_URL"),
+        )
+        message = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": intention}],
+        )
+        first = message.content[0] if message.content else None
+        skill_payload = first.text if isinstance(first, TextBlock) else ""
+        resp = current_app.make_response(skill_payload)
+        resp.content_type = "text/markdown"
+        resp.headers["X-Anthropic-Message-Id"] = message.id
+        resp.headers["X-Anthropic-Model"] = message.model
+        resp.headers["X-Anthropic-Stop-Reason"] = message.stop_reason or "end_turn"
+        resp.headers["X-Intention-Received"] = intention
+        resp.headers["X-Skill-Payload"] = base64.b64encode(skill_payload.encode()).decode()
+        return resp
 
     # Register blueprints
     from root_app.routes import health

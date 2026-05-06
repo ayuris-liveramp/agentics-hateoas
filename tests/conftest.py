@@ -20,11 +20,18 @@ def leaf_api_url() -> str:
 
 
 @pytest.fixture(scope="session")
-def wait_for_services(root_app_url: str, leaf_api_url: str) -> None:
+def mock_anthropic_url() -> str:
+    """Get mock Anthropic server URL from environment."""
+    return os.environ.get("MOCK_ANTHROPIC_URL", "http://localhost:8082")
+
+
+@pytest.fixture(scope="session")
+def wait_for_services(root_app_url: str, leaf_api_url: str, mock_anthropic_url: str) -> None:
     """Wait for services to be ready."""
     services = [
         ("Root App", root_app_url),
         ("Leaf API", leaf_api_url),
+        ("Mock Anthropic", mock_anthropic_url),
     ]
 
     for name, url in services:
