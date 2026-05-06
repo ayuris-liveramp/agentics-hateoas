@@ -18,11 +18,13 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
+      - name: Install system dependencies
+        run: sudo apt-get install -y libpq-dev
+
       - name: Install dependencies
         run: |
           pip install pyrefly
-          pip install flask flask-sqlalchemy pyjwt sqlalchemy cryptography \
-            pydantic python-dotenv requests sqlmodel pytest
+          pip install -r requirements-frozen.txt
 
       - name: Run Pyrefly
         run: pyrefly check .
