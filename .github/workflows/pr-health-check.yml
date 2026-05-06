@@ -1,4 +1,4 @@
-name: PR Health Check
+name: functional tests
 
 on:
   pull_request:
