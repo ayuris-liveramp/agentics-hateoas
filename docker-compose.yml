@@ -51,7 +51,7 @@ services:
 
   api.anthropic.com:
     build:
-      context: ./mock
+      context: ./mock/anthropic
       dockerfile: Dockerfile
     container_name: agentics-mock-anthropic
     ports:
