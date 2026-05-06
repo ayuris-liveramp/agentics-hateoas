@@ -1,0 +1,41 @@
+name: PR Health Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  health-check:
+    name: Docker Compose + Health Tests
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install zsh
+        run: sudo apt-get install -y zsh
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Start services and wait for healthy
+        run: docker compose up -d --wait --wait-timeout 120
+
+      - name: Show service state (raw JSON)
+        run: |
+          echo "=== docker compose ps --format json ==="
+          docker compose ps --format json
+          echo "=== docker compose ps (table) ==="
+          docker compose ps
+
+      - name: Run tests
+        run: make test
+
+      - name: Collect logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down
