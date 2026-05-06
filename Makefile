@@ -3,17 +3,20 @@ venv=source .venv/bin/activate &&
 
 OPENSSL_IMAGE:=python:3.11-slim
 
-default: .venv requirements-frozen.txt leaf_api/auth/keypair.pem docker-compose.yaml.build db_init/00_create_database.sql docker-compose.yaml.up
+default: .venv requirements-frozen.txt requirements-dev-frozen.txt leaf_api/auth/keypair.pem docker-compose.yaml.build db_init/00_create_database.sql docker-compose.yaml.up
 
 .venv:
 	uv venv $@
 	$(MAKE) .venv/lib/python/site-packages
 
-.venv/lib/python/site-packages: requirements.txt
-	$(venv) uv pip install -r requirements.txt --native-tls
+.venv/lib/python/site-packages: requirements.txt requirements-dev.txt
+	$(venv) uv pip install -r requirements.txt -r requirements-dev.txt --native-tls
 
 requirements-frozen.txt: requirements.txt
-	$(venv) uv pip freeze > $@
+	uv pip compile $< -o $@
+
+requirements-dev-frozen.txt: requirements.txt requirements-dev.txt
+	uv pip compile $^ -o $@
 
 docker-compose.yaml.build: requirements-frozen.txt
 	docker compose build
