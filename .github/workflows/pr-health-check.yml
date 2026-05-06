@@ -22,8 +22,12 @@ jobs:
       - name: Start services and wait for healthy
         run: docker compose up -d --wait --wait-timeout 120
 
-      - name: Show service state
-        run: docker compose ps -a
+      - name: Show service state (raw JSON)
+        run: |
+          echo "=== docker compose ps --format json ==="
+          docker compose ps --format json
+          echo "=== docker compose ps (table) ==="
+          docker compose ps
 
       - name: Run tests
         run: make test

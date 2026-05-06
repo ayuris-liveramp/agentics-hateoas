@@ -29,8 +29,12 @@ docker-compose.yaml.down:
 
 docker-compose.yaml.check:
 	@echo "Checking docker compose services..."
-	@docker compose ps --format '{{.Service}}' | \
-		wc -l | xargs -I{} test {} -eq 3 || \
+	@docker compose ps --format json | python3 -c "\
+import sys, json; \
+raw = sys.stdin.read().strip(); \
+svcs = json.loads(raw) if raw.startswith('[') else [json.loads(l) for l in raw.splitlines() if l.strip()]; \
+down = [s.get('Service', s.get('Name', '?')) for s in svcs if s.get('State', '').lower() != 'running']; \
+(print('Services not running:', down) or sys.exit(1)) if down or not svcs else print(len(svcs), 'services running')" || \
 		(echo "Error: docker compose services not running. Run 'make' first."; exit 1)
 
 psql: docker-compose.yaml.check
