@@ -1,12 +1,16 @@
 from decimal import Decimal
-from typing import Optional
+from typing import ClassVar, Optional, TYPE_CHECKING
 from sqlmodel import SQLModel, Field, Relationship
 from leaf_api.models.base import BaseModel
+
+if TYPE_CHECKING:
+    from leaf_api.models.customer import Customer
+    from leaf_api.models.product import Product
 
 
 class Order(BaseModel, table=True):
     """Order model"""
-    __tablename__ = "orders"
+    __tablename__: ClassVar[str] = "orders"  # type: ignore[assignment]
 
     customer_id: int = Field(foreign_key="customers.id")
     product_id: int = Field(foreign_key="products.id")

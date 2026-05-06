@@ -1,6 +1,7 @@
 """Customers resource endpoints"""
 
 import json
+from typing import cast
 from flask import Blueprint, jsonify, request, Response
 from leaf_api.models import db
 from leaf_api.models.customer import Customer
@@ -17,7 +18,7 @@ def list_customers():
     """List all customers (GET) or create a new customer (POST)"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
@@ -46,7 +47,7 @@ def head_customers():
     """List all customers (HEAD) - for discovery"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
@@ -92,11 +93,11 @@ def get_customer(customer_id: int):
     """Get a specific customer (GET)"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    customer = db.session.query(Customer).filter(Customer.id == customer_id).first_or_404()
+    customer = db.get_or_404(Customer, customer_id)
     data = {
         **customer.model_dump(),
         "_meta": {"role": user_context["role"]},
@@ -109,11 +110,11 @@ def head_customer(customer_id: int):
     """Get a specific customer (HEAD) - for discovery"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    customer = db.session.query(Customer).filter(Customer.id == customer_id).first_or_404()
+    customer = db.get_or_404(Customer, customer_id)
 
     # Generate schema
     schema = CustomerSchemaGenerator.get_detail_schema(

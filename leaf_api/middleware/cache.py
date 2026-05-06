@@ -1,6 +1,6 @@
 """Cache management and ETag handling for HEAD requests"""
 
-from typing import Dict, Optional
+from typing import Any, Dict, Mapping, Optional
 from datetime import datetime
 from shared.utils import generate_etag, set_cache_headers, check_etag_match
 
@@ -19,7 +19,7 @@ class CacheManager:
         set_cache_headers(response_headers, etag, ttl)
 
     @staticmethod
-    def should_return_304(request_headers: Dict, current_etag: str) -> bool:
+    def should_return_304(request_headers: Any, current_etag: str) -> bool:
         """Determine if should return 304 Not Modified"""
         if_none_match = request_headers.get("If-None-Match", "")
         if not if_none_match:

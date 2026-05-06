@@ -1,6 +1,6 @@
 """HEAD request handler and API discovery logic"""
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Mapping, Optional
 from flask import request, jsonify, Response
 from leaf_api.middleware.cache import CacheManager
 from leaf_api.auth.roles import get_visible_fields
@@ -15,9 +15,9 @@ class DiscoveryHandler:
         resource_type: str,
         description: str,
         schema: Dict,
-        children: List[str] = None,
+        children: Optional[List[str]] = None,
         user_role: str = "public",
-        permissions: List[str] = None,
+        permissions: Optional[List[str]] = None,
     ) -> Dict:
         """Build response body for HEAD requests"""
         response_data = {
@@ -56,7 +56,7 @@ class DiscoveryHandler:
         return response
 
     @staticmethod
-    def should_return_304(request_headers: Dict, current_etag: str) -> bool:
+    def should_return_304(request_headers: Any, current_etag: str) -> bool:
         """Check if request has matching ETag for 304 response"""
         return CacheManager.should_return_304(request_headers, current_etag)
 

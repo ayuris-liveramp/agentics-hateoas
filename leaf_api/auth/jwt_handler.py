@@ -2,7 +2,7 @@
 
 import jwt
 from functools import wraps
-from typing import Optional, Dict, Tuple
+from typing import Any, Optional, Dict, Tuple, cast
 from flask import request, jsonify
 from leaf_api.auth.roles import DEFAULT_ROLE, ROLES
 
@@ -10,14 +10,14 @@ from leaf_api.auth.roles import DEFAULT_ROLE, ROLES
 class JWTHandler:
     """Handles JWT validation and decoding"""
 
-    def __init__(self, public_key_path: str = None, private_key_path: str = None):
+    def __init__(self, public_key_path: Optional[str] = None, private_key_path: Optional[str] = None):
         self.public_key_path = public_key_path
         self.private_key_path = private_key_path
-        self._public_key = None
-        self._private_key = None
+        self._public_key: Optional[str] = None
+        self._private_key: Optional[str] = None
 
     @property
-    def public_key(self) -> str:
+    def public_key(self) -> Optional[str]:
         """Load and cache public key"""
         if not self._public_key and self.public_key_path:
             try:
@@ -28,7 +28,7 @@ class JWTHandler:
         return self._public_key
 
     @property
-    def private_key(self) -> str:
+    def private_key(self) -> Optional[str]:
         """Load and cache private key"""
         if not self._private_key and self.private_key_path:
             try:
@@ -46,10 +46,14 @@ class JWTHandler:
         if not token:
             return None
 
+        public_key = self.public_key
+        if not public_key:
+            return None
+
         try:
             claims = jwt.decode(
                 token,
-                self.public_key,
+                public_key,
                 algorithms=["EdDSA"],
             )
             return claims
@@ -58,7 +62,7 @@ class JWTHandler:
         except jwt.InvalidTokenError:
             return None
 
-    def extract_jwt_from_header(self, headers: Dict) -> Optional[str]:
+    def extract_jwt_from_header(self, headers: Any) -> Optional[str]:
         """Extract JWT token from Authorization header"""
         auth_header = headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):
@@ -103,7 +107,7 @@ class JWTHandler:
             "claims": claims,
         }
 
-    def create_token(self, user_id: str, role: str = DEFAULT_ROLE, exp: int = None) -> str:
+    def create_token(self, user_id: str, role: str = DEFAULT_ROLE, exp: Optional[int] = None) -> str:
         """Create a JWT token (for testing/demo purposes)"""
         import time
 
@@ -115,9 +119,13 @@ class JWTHandler:
         if exp:
             payload["exp"] = int(time.time()) + exp
 
+        private_key = self.private_key
+        if not private_key:
+            raise RuntimeError("No private key configured")
+
         return jwt.encode(
             payload,
-            self.private_key,
+            private_key,
             algorithm="EdDSA",
         )
 
@@ -127,7 +135,7 @@ def require_auth(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         from flask import current_app
-        handler = current_app.jwt_handler
+        handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
         token = handler.extract_jwt_from_header(request.headers)
         if not token:
             return jsonify({"error": "Missing authorization token"}), 401

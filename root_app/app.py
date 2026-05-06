@@ -1,11 +1,12 @@
 """Root application factory"""
 
 import os
+from typing import Optional
 from flask import Flask, jsonify, current_app
 from root_app.config import config
 
 
-def create_app(config_name: str = None) -> Flask:
+def create_app(config_name: Optional[str] = None) -> Flask:
     """Application factory"""
     if config_name is None:
         config_name = os.environ.get("FLASK_ENV", "development")

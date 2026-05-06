@@ -53,7 +53,7 @@ class APIGraph:
         """Get all discovered resource paths"""
         return list(self.nodes.keys())
 
-    def traverse_breadth_first(self, start: str = None) -> Generator[str, None, None]:
+    def traverse_breadth_first(self, start: Optional[str] = None) -> Generator[str, None, None]:
         """Breadth-first traversal of graph"""
         if not start and self.nodes:
             start = "/"
@@ -77,7 +77,7 @@ class APIGraph:
                 if child not in visited:
                     queue.append(child)
 
-    def traverse_depth_first(self, start: str = None, visited: set = None) -> Generator[str, None, None]:
+    def traverse_depth_first(self, start: Optional[str] = None, visited: Optional[set] = None) -> Generator[str, None, None]:
         """Depth-first traversal of graph"""
         if not start and self.nodes:
             start = "/"

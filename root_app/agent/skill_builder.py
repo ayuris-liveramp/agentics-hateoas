@@ -1,7 +1,7 @@
 """Builds skill descriptions from API graph"""
 
 import json
-from typing import Dict, Optional, List
+from typing import Any, Dict, List, Optional
 from root_app.crawler.graph_builder import APIGraph
 
 
@@ -9,7 +9,7 @@ class SkillBuilder:
     """Converts API graph to markdown skill format for LLM agents"""
 
     @staticmethod
-    def build_skill_markdown(graph: APIGraph, intention: Dict = None) -> str:
+    def build_skill_markdown(graph: APIGraph, intention: Optional[Dict] = None) -> str:
         """
         Convert API graph to markdown skill format
 

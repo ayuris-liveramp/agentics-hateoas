@@ -51,7 +51,7 @@ class APICrawler:
         url: str,
         max_depth: int = 5,
         current_depth: int = 0,
-        visited: Set[str] = None,
+        visited: Optional[Set[str]] = None,
     ) -> Optional[Dict]:
         """
         Recursively crawl API with cycle detection

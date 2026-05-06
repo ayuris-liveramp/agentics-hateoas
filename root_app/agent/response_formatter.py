@@ -1,7 +1,7 @@
 """Response formatting for agent queries"""
 
 import json
-from typing import Dict, Any
+from typing import Any, Dict, Optional
 
 
 class ResponseFormatter:
@@ -10,8 +10,8 @@ class ResponseFormatter:
     @staticmethod
     def format_discovery_response(
         skill_markdown: str,
-        intention: Dict = None,
-        graph_summary: Dict = None,
+        intention: Optional[Dict] = None,
+        graph_summary: Optional[Dict] = None,
     ) -> Dict[str, Any]:
         """
         Format a discovery response for agents
