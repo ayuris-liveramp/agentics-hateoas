@@ -1,0 +1,30 @@
+name: Pyrefly Type Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  type-check:
+    name: Pyrefly
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install system dependencies
+        run: sudo apt-get install -y libpq-dev
+
+      - name: Install dependencies
+        run: |
+          pip install pyrefly
+          pip install -r requirements-frozen.txt
+
+      - name: Run Pyrefly
+        run: pyrefly check .

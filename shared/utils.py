@@ -2,7 +2,7 @@
 
 import hashlib
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
 from email.utils import formatdate
 
@@ -18,7 +18,7 @@ def generate_etag(content: Any) -> str:
 
 
 def set_cache_headers(
-    response_headers: Dict, etag: str, ttl: int = 3600, last_modified: datetime = None
+    response_headers: Dict, etag: str, ttl: int = 3600, last_modified: Optional[datetime] = None
 ) -> Dict:
     """Set cache control headers on response"""
     response_headers["ETag"] = f'"{etag}"'
@@ -32,7 +32,7 @@ def set_cache_headers(
     return response_headers
 
 
-def parse_if_none_match(header_value: str) -> str:
+def parse_if_none_match(header_value: str) -> Optional[str]:
     """Parse If-None-Match header and return ETag value"""
     if not header_value:
         return None
@@ -47,7 +47,7 @@ def check_etag_match(current_etag: str, if_none_match: str) -> bool:
     return current_etag == parse_if_none_match(if_none_match)
 
 
-def rfc2822_to_datetime(rfc2822_str: str) -> datetime:
+def rfc2822_to_datetime(rfc2822_str: str) -> Optional[datetime]:
     """Convert RFC2822 datetime string to datetime object"""
     from email.utils import parsedate_to_datetime
 

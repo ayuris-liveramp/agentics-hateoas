@@ -2,6 +2,7 @@
 
 import os
 import time
+from typing import Optional
 from flask import Flask, jsonify
 from sqlalchemy.exc import OperationalError
 from leaf_api.config import config
@@ -9,7 +10,7 @@ from leaf_api.models import db
 from leaf_api.auth.jwt_handler import JWTHandler
 
 
-def create_app(config_name: str = None) -> Flask:
+def create_app(config_name: Optional[str] = None) -> Flask:
     """Application factory"""
     if config_name is None:
         config_name = os.environ.get("FLASK_ENV", "development")
@@ -23,7 +24,7 @@ def create_app(config_name: str = None) -> Flask:
     db.init_app(app)
 
     # Initialize JWT handler
-    app.jwt_handler = JWTHandler(
+    app.extensions["jwt_handler"] = JWTHandler(
         public_key_path=app.config["JWT_PUBLIC_KEY_PATH"],
         private_key_path=app.config["JWT_PRIVATE_KEY_PATH"],
     )

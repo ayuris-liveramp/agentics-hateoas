@@ -1,6 +1,14 @@
 """Role definitions and permissions"""
 
-ROLES = {
+from typing import TypedDict, Dict, List
+
+
+class _RoleData(TypedDict):
+    permissions: List[str]
+    visible_fields: Dict[str, List[str]]
+
+
+ROLES: Dict[str, _RoleData] = {
     "admin": {
         "permissions": ["read", "write", "delete"],
         "visible_fields": {
@@ -30,7 +38,7 @@ ROLES = {
 DEFAULT_ROLE = "public"
 
 
-def get_role_permissions(role: str) -> list:
+def get_role_permissions(role: str) -> List[str]:
     """Get permissions for a role"""
     return ROLES.get(role, ROLES[DEFAULT_ROLE])["permissions"]
 

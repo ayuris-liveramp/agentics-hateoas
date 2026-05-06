@@ -8,13 +8,13 @@ from shared.constants import USER_AGENT_LLM_PREFIX
 class APIClient:
     """HTTP client for discovering APIs via HEAD requests"""
 
-    def __init__(self, timeout: int = 5, headers: Dict = None):
+    def __init__(self, timeout: int = 5, headers: Optional[Dict] = None):
         self.timeout = timeout
         self.base_headers = headers or {}
         self.session = requests.Session()
 
     def head_request(
-        self, url: str, include_body: bool = True, if_none_match: str = None
+        self, url: str, include_body: bool = True, if_none_match: Optional[str] = None
     ) -> Optional[Dict]:
         """
         Make a HEAD request to an API endpoint

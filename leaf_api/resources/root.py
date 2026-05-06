@@ -1,7 +1,9 @@
 """Root endpoint and API discovery"""
 
 import json
+from typing import cast
 from flask import Blueprint, jsonify, request, Response
+from leaf_api.auth.jwt_handler import JWTHandler
 from leaf_api.middleware.cache import CacheManager
 from leaf_api.middleware.discovery import DiscoveryHandler
 
@@ -33,7 +35,7 @@ def head_root():
     """Root endpoint (HEAD) - for discovery"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 

@@ -1,6 +1,7 @@
 """Products resource endpoints"""
 
 import json
+from typing import cast
 from flask import Blueprint, jsonify, request, Response
 from leaf_api.models import db
 from leaf_api.models.product import Product
@@ -17,7 +18,7 @@ def list_products():
     """List all products (GET) or create a new product (POST)"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
@@ -46,7 +47,7 @@ def head_products():
     """List all products (HEAD) - for discovery"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
@@ -92,11 +93,11 @@ def get_product(product_id: int):
     """Get a specific product (GET)"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    product = db.session.query(Product).filter(Product.id == product_id).first_or_404()
+    product = db.get_or_404(Product, product_id)
     data = {
         **product.model_dump(),
         "_meta": {"role": user_context["role"]},
@@ -109,11 +110,11 @@ def head_product(product_id: int):
     """Get a specific product (HEAD) - for discovery"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    product = db.session.query(Product).filter(Product.id == product_id).first_or_404()
+    product = db.get_or_404(Product, product_id)
 
     # Generate schema
     schema = ProductSchemaGenerator.get_detail_schema(

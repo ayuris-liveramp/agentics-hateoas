@@ -1,5 +1,6 @@
 """Orders resource endpoints"""
 
+from typing import cast
 from flask import Blueprint, jsonify, request, Response
 from leaf_api.models import db
 from leaf_api.models.order import Order
@@ -16,7 +17,7 @@ def list_orders():
     """List all orders (GET) or create a new order (POST)"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
@@ -46,7 +47,7 @@ def head_orders():
     """List all orders (HEAD) - for discovery"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
@@ -93,11 +94,11 @@ def get_order(order_id: int):
     """Get a specific order (GET)"""
     from flask import current_app
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    order = db.session.query(Order).filter(Order.id == order_id).first_or_404()
+    order = db.get_or_404(Order, order_id)
     data = {
         **order.model_dump(),
         "_meta": {"role": user_context["role"]},
@@ -111,11 +112,11 @@ def head_order(order_id: int):
     from flask import current_app
     import json
 
-    handler = current_app.jwt_handler
+    handler = cast(JWTHandler, current_app.extensions["jwt_handler"])
     token = handler.extract_jwt_from_header(request.headers)
     user_context = handler.get_user_context(token)
 
-    order = db.session.query(Order).filter(Order.id == order_id).first_or_404()
+    order = db.get_or_404(Order, order_id)
 
     # Generate schema
     schema = OrderSchemaGenerator.get_detail_schema(
