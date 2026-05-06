@@ -16,24 +16,8 @@ jobs:
       - name: Build images
         run: docker compose build
 
-      - name: Start services
-        run: docker compose up -d
-
-      - name: Wait for services to be healthy
-        run: |
-          echo "Waiting for all services to report healthy..."
-          for i in $(seq 1 30); do
-            healthy=$(docker compose ps --format json \
-              | python3 -c "import sys, json; data=sys.stdin.read(); \
-                services=[json.loads(l) for l in data.splitlines() if l.strip()]; \
-                print(all(s.get('Health','') in ('healthy','') for s in services))")
-            if [ "$healthy" = "True" ]; then
-              echo "All services healthy after ${i}s"
-              break
-            fi
-            sleep 1
-          done
-          docker compose ps
+      - name: Start services and wait for healthy
+        run: docker compose up -d --wait --wait-timeout 120
 
       - name: Run tests
         run: make test
