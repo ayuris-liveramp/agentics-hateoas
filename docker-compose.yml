@@ -49,6 +49,22 @@ services:
     networks:
       - agentics-network
 
+  api.anthropic.com:
+    build:
+      context: ./mock
+      dockerfile: Dockerfile
+    container_name: agentics-mock-anthropic
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8082/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    networks:
+      - agentics-network
+
   root-app:
     build:
       context: .
@@ -59,10 +75,14 @@ services:
       FLASK_ENV: development
       CHILD_API_URLS: http://leaf-api:5000
       CACHE_DIR: /app/cache
+      ANTHROPIC_API_KEY: test-key
+      ANTHROPIC_BASE_URL: http://api.anthropic.com:8082
     ports:
       - "5001:5001"
     depends_on:
       leaf-api:
+        condition: service_healthy
+      api.anthropic.com:
         condition: service_healthy
     volumes:
       - ./root_app:/app/root_app

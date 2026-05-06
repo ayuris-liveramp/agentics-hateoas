@@ -2,7 +2,8 @@
 
 import os
 from typing import Optional
-from flask import Flask, jsonify, current_app
+import anthropic
+from flask import Flask, jsonify, request, current_app
 from root_app.config import config
 
 
@@ -45,6 +46,27 @@ def create_app(config_name: Optional[str] = None) -> Flask:
         graph, graph_store, cache_manager = get_crawler_and_graph(current_app.config)
         skill_markdown = SkillBuilder.build_skill_markdown(graph)
         return jsonify([skill_markdown])
+
+    @app.route("/skills", methods=["HEAD"])
+    def head_skills():
+        """Forward Accept-Intention to mock Anthropic and return response metadata as headers."""
+        intention = request.headers.get("Accept-Intention", "list skills")
+        client = anthropic.Anthropic(
+            api_key=os.environ.get("ANTHROPIC_API_KEY", "test-key"),
+            base_url=os.environ.get("ANTHROPIC_BASE_URL"),
+        )
+        message = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": intention}],
+        )
+        resp = current_app.make_response("")
+        resp.headers["X-Anthropic-Message-Id"] = message.id
+        resp.headers["X-Anthropic-Model"] = message.model
+        resp.headers["X-Anthropic-Stop-Reason"] = message.stop_reason or "end_turn"
+        resp.headers["X-Intention-Received"] = intention
+        resp.status_code = 200
+        return resp
 
     # Register blueprints
     from root_app.routes import health
