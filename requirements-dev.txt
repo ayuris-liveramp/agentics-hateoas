@@ -1,13 +1,3 @@
-Flask
-Flask-SQLAlchemy
-PyJWT
-SQLAlchemy
-cryptography
-psycopg2
-pydantic
-python-dotenv
-requests
-sqlmodel
 pytest
 pytest-cov
 pyrefly

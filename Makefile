@@ -9,14 +9,14 @@ default: .venv requirements-frozen.txt requirements-dev-frozen.txt leaf_api/auth
 	uv venv $@
 	$(MAKE) .venv/lib/python/site-packages
 
-.venv/lib/python/site-packages: requirements-dev.txt
-	$(venv) uv pip install -r requirements-dev.txt --native-tls
+.venv/lib/python/site-packages: requirements.txt requirements-dev.txt
+	$(venv) uv pip install -r requirements.txt -r requirements-dev.txt --native-tls
 
 requirements-frozen.txt: requirements.txt
 	uv pip compile $< -o $@
 
-requirements-dev-frozen.txt: requirements-dev.txt
-	uv pip compile $< -o $@
+requirements-dev-frozen.txt: requirements.txt requirements-dev.txt
+	uv pip compile $^ -o $@
 
 docker-compose.yaml.build: requirements-frozen.txt
 	docker compose build
