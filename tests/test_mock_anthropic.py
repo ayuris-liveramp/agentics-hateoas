@@ -1,20 +1,23 @@
 """Functional test: mock Anthropic server facilitates end-to-end request/response handling."""
 
+import base64
 import requests
+
+SKILL_PROMPT = "create a new product and order it"
 
 
 class TestMockAnthropicEndToEnd:
-    def test_end_to_end_via_root_app_accept_intention_head(
+    def test_end_to_end_accept_intention_returns_skill_payload(
         self, root_client, mock_anthropic_url, wait_for_services
     ):
         """
         Full end-to-end path:
-          test → HEAD /skills (root-app, Accept-Intention header)
+          test → HEAD / (root-app, Accept-Intention: create a new product and order it)
                → Anthropic SDK → mock Anthropic server (POST /v1/messages)
-               → fixed mock response
-               → X-Anthropic-* headers returned to caller
+               → markdown skill payload (POST /products + POST /orders)
+               → X-Skill-Payload header (base64) returned to caller
         """
-        # Verify the mock server itself is healthy and returns a valid response
+        # Verify mock returns markdown skill for the specific prompt
         mock_resp = requests.post(
             f"{mock_anthropic_url}/v1/messages",
             headers={
@@ -25,7 +28,7 @@ class TestMockAnthropicEndToEnd:
             json={
                 "model": "claude-sonnet-4-6",
                 "max_tokens": 1024,
-                "messages": [{"role": "user", "content": "What skills are available?"}],
+                "messages": [{"role": "user", "content": SKILL_PROMPT}],
             },
             timeout=5,
         )
@@ -34,16 +37,19 @@ class TestMockAnthropicEndToEnd:
         assert mock_data["type"] == "message"
         assert mock_data["role"] == "assistant"
         assert mock_data["stop_reason"] == "end_turn"
-        assert mock_data["content"][0]["type"] == "text"
+        skill_text = mock_data["content"][0]["text"]
+        assert "POST /products" in skill_text
+        assert "POST /orders" in skill_text
 
-        # Verify root-app HEAD /skills routes through the SDK to the mock and returns headers
+        # Verify root-app HEAD / routes through SDK to mock and surfaces the skill payload
         head_resp = root_client.head(
-            "/skills",
-            headers={"Accept-Intention": "list available skills"},
+            "/",
+            headers={"Accept-Intention": SKILL_PROMPT},
         )
         assert head_resp.status_code == 200
-        assert "X-Anthropic-Message-Id" in head_resp.headers
+        assert "X-Skill-Payload" in head_resp.headers
+        skill_payload = base64.b64decode(head_resp.headers["X-Skill-Payload"]).decode()
+        assert "POST /products" in skill_payload
+        assert "POST /orders" in skill_payload
         assert head_resp.headers["X-Anthropic-Message-Id"] == "msg_mock_test_abc123"
-        assert "X-Anthropic-Model" in head_resp.headers
-        assert head_resp.headers["X-Anthropic-Stop-Reason"] == "end_turn"
-        assert head_resp.headers.get("X-Intention-Received") == "list available skills"
+        assert head_resp.headers.get("X-Anthropic-Stop-Reason") == "end_turn"
