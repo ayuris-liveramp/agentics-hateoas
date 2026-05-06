@@ -8,3 +8,6 @@ pydantic
 python-dotenv
 requests
 sqlmodel
+pytest
+pytest-cov
+pyrefly
