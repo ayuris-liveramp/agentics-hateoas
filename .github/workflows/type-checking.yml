@@ -1,4 +1,4 @@
-name: Pyrefly Type Check
+name: type checking
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   type-check:
-    name: Pyrefly
+    name: pyrefly
     runs-on: ubuntu-latest
 
     steps:

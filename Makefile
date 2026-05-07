@@ -66,7 +66,7 @@ leaf_api/auth/token.%.b64: leaf_api/auth/public_key.pem
 .PHONY: test
 test: docker-compose.yaml.check
 	@echo "Building test image..."
-	@docker build -f tests/Dockerfile -t agentics-test .
+	@docker build --quiet -f tests/Dockerfile -t agentics-test .
 	@echo "Running functional tests..."
 	@docker run --rm \
 		--network agentics-hateoas_agentics-network \
@@ -74,4 +74,4 @@ test: docker-compose.yaml.check
 		-e LEAF_API_URL=http://leaf-api:5000 \
 		-e ROOT_APP_URL=http://root-app:5001 \
 		-e MOCK_ANTHROPIC_URL=http://api.anthropic.com:8082 \
-		agentics-test -v /app/tests
+		agentics-test --color=yes /app/tests
